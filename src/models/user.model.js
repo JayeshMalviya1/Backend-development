@@ -17,7 +17,7 @@ const userSchema = new Schema(
             unique:true,
             trim:true,
         },
-        fullname:{
+        fullName:{
             type:String,
             required:true,
             unique:true,
@@ -54,5 +54,30 @@ userSchema.pre("save",async function(next){
     this.password=bcrypt.hash(this.password,10)
     next()
 })
+userSchema.methods.generateAccessToken =function(){
+    jwt.sign({
+        _id:this._id,
+        email:this.email,
+        username:this.userSchema,
+        fullName:this.fullName
+    }),
+    process.env.ACCESS_TOKEN_SECRET,{
+        expiresIn:process.env.ACCESS_TOKEN_SECRET
+    }
+}
+userSchema.methods.generateRefreshToken =function(){
+
+    jwt.sign({
+        _id:this._id,
+        
+    }),
+    process.env.ACCESS_TOKEN_SECRET,{
+        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+    }
+}
+
+userSchema.method.isPasswordCorrect =async function(password) {
+    return await bcrypt.compare(password,this.password)
+}
 
 export const User = mongoose.model("User",userSchema)
